@@ -39,5 +39,10 @@
     "@octokit/rest": "^18.0.12",
     "lodash.chunk": "^4.2.0",
     "tslib": "^1.14.1"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "pretty-quick --staged"
+    }
   }
 }
