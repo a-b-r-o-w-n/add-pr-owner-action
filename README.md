@@ -1,4 +1,4 @@
-# add-reviewer-as-assignee-action
+# add-pr-owner-action
 
 Adds code reviewer as pull request assignee.
 
