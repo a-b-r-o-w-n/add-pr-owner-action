@@ -1,0 +1,15 @@
+{
+  "compilerOptions": {
+    "target": "es6",
+    "module": "commonjs",
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "strict": true,
+    "noImplicitAny": false,
+    "esModuleInterop": true,
+    "importHelpers": true,
+    "moduleResolution": "node"
+  },
+  "exclude": ["node_modules"],
+  "files": ["src/add-pr-owner-action.ts"]
+}
