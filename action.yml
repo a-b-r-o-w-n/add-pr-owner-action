@@ -1,0 +1,12 @@
+name: "Add PR Owner"
+description: "Adds code reviewer as pull request assignee."
+inputs:
+  repo-token:
+    description: "Token used to interact with the Github API."
+    required: true
+runs:
+  using: "node12"
+  main: "dist/add-pr-owner-action.js"
+branding:
+  icon: "eye"
+  color: "blue"
