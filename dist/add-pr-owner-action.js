@@ -6622,12 +6622,22 @@ function addAssignees(octokit, owner, repo, prNumber, assignees) {
     return tslib_1.__awaiter(this, void 0, void 0, function* () {
         core.info(`Assigning ${assignees.join(", ")}.`);
         const chunks = lodash_chunk_1.default(assignees, 10);
-        yield Promise.all(chunks.map((batch) => octokit.issues.addAssignees({
-            repo,
-            owner,
-            issue_number: prNumber,
-            assignees: batch,
-        })));
+        try {
+            yield Promise.all(chunks.map((batch) => octokit.issues.addAssignees({
+                repo,
+                owner,
+                issue_number: prNumber,
+                assignees: batch,
+            })));
+        }
+        catch (err) {
+            if (err.status === 403) {
+                core.setFailed("Unable to assign users. Token provided does not have write permission.");
+            }
+            else {
+                throw err;
+            }
+        }
     });
 }
 exports.addAssignees = addAssignees;

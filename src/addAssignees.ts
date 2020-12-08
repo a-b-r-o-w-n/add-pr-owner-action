@@ -12,14 +12,22 @@ export async function addAssignees(
   core.info(`Assigning ${assignees.join(", ")}.`);
   const chunks = chunk(assignees, 10);
 
-  await Promise.all(
-    chunks.map((batch) =>
-      octokit.issues.addAssignees({
-        repo,
-        owner,
-        issue_number: prNumber,
-        assignees: batch,
-      })
-    )
-  );
+  try {
+    await Promise.all(
+      chunks.map((batch) =>
+        octokit.issues.addAssignees({
+          repo,
+          owner,
+          issue_number: prNumber,
+          assignees: batch,
+        })
+      )
+    );
+  } catch (err) {
+    if (err.status === 403) {
+      core.setFailed("Unable to assign users. Token provided does not have write permission.");
+    } else {
+      throw err;
+    }
+  }
 }
