@@ -25,7 +25,7 @@ export async function addAssignees(
     );
   } catch (err) {
     if (err.status === 403) {
-      core.setFailed("Unable to assign users. Token provided does not have write permission.");
+      core.warning("Unable to assign users. Token provided does not have write permission.");
     } else {
       throw err;
     }
