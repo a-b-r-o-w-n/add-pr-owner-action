@@ -1,6 +1,6 @@
 {
   "name": "add-pr-owner-action",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Adds code reviewer as pull request assignee.",
   "main": "dist/add-pr-owner-action.js",
   "scripts": {
