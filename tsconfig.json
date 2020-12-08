@@ -11,5 +11,5 @@
     "moduleResolution": "node"
   },
   "exclude": ["node_modules"],
-  "files": ["src/add-pr-owner-action.ts", "src/addAssignees.ts", "src/getPrNumber.ts", "src/getReviewers.ts"]
+  "files": ["src/add-pr-owner-action.ts", "src/addAssignees.ts", "src/commonOptions.ts", "src/getReviewers.ts"]
 }

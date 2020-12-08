@@ -2,15 +2,12 @@ import * as core from "@actions/core";
 import { Octokit } from "@octokit/rest";
 import chunk from "lodash.chunk";
 
-export async function addAssignees(
-  octokit: Octokit,
-  owner: string,
-  repo: string,
-  prNumber: number,
-  assignees: string[]
-) {
+import { commonOptions } from "./commonOptions";
+
+export async function addAssignees(octokit: Octokit, assignees: string[]) {
   core.info(`Assigning ${assignees.join(", ")}.`);
   const chunks = chunk(assignees, 10);
+  const { repo, owner, pull_number: issue_number } = commonOptions();
 
   try {
     await Promise.all(
@@ -18,7 +15,7 @@ export async function addAssignees(
         octokit.issues.addAssignees({
           repo,
           owner,
-          issue_number: prNumber,
+          issue_number,
           assignees: batch,
         })
       )

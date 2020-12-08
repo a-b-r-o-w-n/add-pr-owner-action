@@ -6574,18 +6574,13 @@ function wrappy (fn, cb) {
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const tslib_1 = __webpack_require__(5636);
 const core = tslib_1.__importStar(__webpack_require__(2186));
-const github = tslib_1.__importStar(__webpack_require__(5438));
 const rest_1 = __webpack_require__(5375);
 const addAssignees_1 = __webpack_require__(6256);
-const getPrNumber_1 = __webpack_require__(6619);
 const getReviewers_1 = __webpack_require__(6101);
-const OWNER = github.context.repo.owner;
-const REPO = github.context.repo.repo;
 function run() {
     var _a;
     return tslib_1.__awaiter(this, void 0, void 0, function* () {
         try {
-            const prNumber = getPrNumber_1.getPrNumber();
             const octokit = new rest_1.Octokit({
                 auth: core.getInput("repo-token", { required: true }),
                 log: {
@@ -6595,8 +6590,8 @@ function run() {
                     error: core.error,
                 },
             });
-            const reviewers = yield getReviewers_1.getReviewers(octokit, OWNER, REPO, prNumber);
-            yield addAssignees_1.addAssignees(octokit, OWNER, REPO, prNumber, reviewers);
+            const reviewers = yield getReviewers_1.getReviewers(octokit);
+            yield addAssignees_1.addAssignees(octokit, reviewers);
         }
         catch (err) {
             core.setFailed((_a = err.message) !== null && _a !== void 0 ? _a : "Error assigning reviewers.");
@@ -6618,15 +6613,17 @@ exports.addAssignees = void 0;
 const tslib_1 = __webpack_require__(5636);
 const core = tslib_1.__importStar(__webpack_require__(2186));
 const lodash_chunk_1 = tslib_1.__importDefault(__webpack_require__(4234));
-function addAssignees(octokit, owner, repo, prNumber, assignees) {
+const commonOptions_1 = __webpack_require__(5089);
+function addAssignees(octokit, assignees) {
     return tslib_1.__awaiter(this, void 0, void 0, function* () {
         core.info(`Assigning ${assignees.join(", ")}.`);
         const chunks = lodash_chunk_1.default(assignees, 10);
+        const { repo, owner, pull_number: issue_number } = commonOptions_1.commonOptions();
         try {
             yield Promise.all(chunks.map((batch) => octokit.issues.addAssignees({
                 repo,
                 owner,
-                issue_number: prNumber,
+                issue_number,
                 assignees: batch,
             })));
         }
@@ -6645,15 +6642,19 @@ exports.addAssignees = addAssignees;
 
 /***/ }),
 
-/***/ 6619:
+/***/ 5089:
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.getPrNumber = void 0;
+exports.commonOptions = exports.getPrNumber = exports.repo = exports.owner = void 0;
 const tslib_1 = __webpack_require__(5636);
 const github = tslib_1.__importStar(__webpack_require__(5438));
+const owner = () => github.context.repo.owner;
+exports.owner = owner;
+const repo = () => github.context.repo.repo;
+exports.repo = repo;
 function getPrNumber() {
     const pullRequest = github.context.payload.pull_request;
     if (!pullRequest) {
@@ -6662,6 +6663,14 @@ function getPrNumber() {
     return pullRequest.number;
 }
 exports.getPrNumber = getPrNumber;
+function commonOptions() {
+    return {
+        owner: exports.owner(),
+        repo: exports.repo(),
+        pull_number: getPrNumber(),
+    };
+}
+exports.commonOptions = commonOptions;
 
 
 /***/ }),
@@ -6674,16 +6683,23 @@ exports.getPrNumber = getPrNumber;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.getReviewers = void 0;
 const tslib_1 = __webpack_require__(5636);
-function getReviewers(octokit, owner, repo, prNumber) {
+const commonOptions_1 = __webpack_require__(5089);
+function getAuthor(octokit) {
+    var _a;
     return tslib_1.__awaiter(this, void 0, void 0, function* () {
-        const resp = yield octokit.pulls.listReviews({
-            owner,
-            repo,
-            pull_number: prNumber,
-        });
+        const resp = yield octokit.pulls.get(commonOptions_1.commonOptions());
+        return (_a = resp.data.user) === null || _a === void 0 ? void 0 : _a.login;
+    });
+}
+function getReviewers(octokit) {
+    return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        const resp = yield octokit.pulls.listReviews(commonOptions_1.commonOptions());
+        const author = yield getAuthor(octokit);
         const users = resp.data.reduce((all, review) => {
-            if (review.user) {
-                all.add(review.user.login);
+            var _a;
+            const login = (_a = review.user) === null || _a === void 0 ? void 0 : _a.login;
+            if (login && login !== author) {
+                all.add(login);
             }
             return all;
         }, new Set());
